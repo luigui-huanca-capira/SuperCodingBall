@@ -12,12 +12,29 @@
 <div class="d-flex flex-row h-100">
   <div style="flex: 1" class="d-flex flex-column">
     <nav class="navbar navbar-expand-lg navbar-light bg-warning justify-content-start p-0">
-      <button class="btn btn-lg d-flex" type="button" (click)="backToOpponentsList()">
+      <button class="btn btn-lg d-flex" type="button" (click)="openExitConfirmPopup(exitConfirmContent)">
         <img src="assets/icons/chevron-left-solid.png" class="oriented-icon icon24" />
       </button>
       <button [disabled]="gameLaunched" class="btn d-flex" type="button"
         onclick="this.blur()" (click)="modalService.open(fieldContent)">
         <img src="assets/icons/info-circle-solid.png" class="icon24" />
+      </button>
+      <button
+        class="btn d-flex"
+        type="button"
+        onclick="this.blur()"
+        [attr.aria-label]="'HOME.BUTTON_HOW_TO' | translate"
+        [attr.title]="'HOME.BUTTON_HOW_TO' | translate"
+        (click)="openHowTo(howToContent)">
+        <svg class="icon24 how-to-icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <circle cx="256" cy="256" r="220"/>
+          <text x="256" y="384" text-anchor="middle">?</text>
+        </svg>
+      </button>
+      <button [disabled]="gameLaunched" class="btn d-flex" type="button"
+        aria-label="Elegir personaje" title="Elegir personaje"
+        onclick="this.blur()" (click)="modalService.open(characterContent, {centered: true})">
+        <img src="assets/icons/user-solid.png" class="icon24" alt="" />
       </button>
       <button [disabled]="gameLaunched" class="btn d-flex" type="button"
         onclick="this.blur()" (click)="openDeletePopup(deleteContent)">
@@ -69,26 +86,83 @@
     <div class="w-100 position-relative" style="max-width: 400px; margin: auto;">
       <img class="w-100 pixelated" src="assets/football-pitch.png">
       <div class="position-absolute attacker left">
-        <img class="player-crop pixelated" src="assets/sprites/guy1.png"
+        <img class="player-crop pixelated" [src]="'assets/sprites/' + playerAssetAt('attacker-left', 'guy1') + '.png'"
           ngbTooltip="{{'BLOCKS.ATTACKER' | translate }} {{'BLOCKS.LEFT' | translate }}" triggers="load"
           [autoClose]=false>
       </div>
       <div class="position-absolute attacker right">
-        <img class="player-crop pixelated" src="assets/sprites/girl1.png"
+        <img class="player-crop pixelated" [src]="'assets/sprites/' + playerAssetAt('attacker-right', 'girl1') + '.png'"
           ngbTooltip="{{'BLOCKS.ATTACKER' | translate }} {{'BLOCKS.RIGHT' | translate }}" triggers="load"
           [autoClose]=false>
       </div>
       <div class="position-absolute defender left">
-        <img class="player-crop pixelated" src="assets/sprites/guy2.png"
+        <img class="player-crop pixelated" [src]="'assets/sprites/' + playerAssetAt('defender-left', 'guy2') + '.png'"
           ngbTooltip="{{'BLOCKS.DEFENDER' | translate }} {{'BLOCKS.LEFT' | translate }}" triggers="load"
           [autoClose]=false>
       </div>
       <div class="position-absolute defender right">
-        <img class="player-crop pixelated" src="assets/sprites/girl2.png"
+        <img class="player-crop pixelated" [src]="'assets/sprites/' + playerAssetAt('defender-right', 'girl2') + '.png'"
           ngbTooltip="{{'BLOCKS.DEFENDER' | translate }} {{'BLOCKS.RIGHT' | translate }}" triggers="load"
           [autoClose]=false>
       </div>
     </div>
+  </div>
+</ng-template>
+
+<ng-template #characterContent let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title">Elige tu personaje</h6>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="character-grid">
+      @for (character of playableCharacters; track character.id) {
+        <button type="button" class="character-option"
+          [class.selected]="selectedCharacter.id === character.id"
+          [attr.aria-pressed]="selectedCharacter.id === character.id"
+          (click)="selectCharacter(character)">
+          <span class="character-portrait">
+            <img [src]="character.portraitAsset" [alt]="character.name">
+          </span>
+          <strong>{{character.name}}</strong>
+        </button>
+      }
+    </div>
+    <h6 class="position-title">Elige su posición en el campo</h6>
+    <div class="position-picker">
+      <img src="assets/football-pitch.png" alt="Campo de fútbol">
+      @for (position of characterPositions; track position.id) {
+        <button type="button" class="position-marker" [class]="position.id"
+          [class.selected]="selectedCharacterPosition === position.id"
+          [attr.aria-label]="position.name" [attr.title]="position.name"
+          (click)="selectCharacterPosition(position.id)">
+          <img [src]="portraitAtPosition(position.id)" alt="">
+        </button>
+      }
+    </div>
+    <p class="selected-position">
+      Posición: <strong>{{characterPositions[selectedCharacterPosition === 'attacker-left' ? 0 : selectedCharacterPosition === 'attacker-right' ? 1 : selectedCharacterPosition === 'defender-left' ? 2 : 3].name}}</strong>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close()">Listo</button>
+  </div>
+</ng-template>
+
+<ng-template #howToContent let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title">{{"HOW_TO.TITLE" | translate }}</h6>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body how-to-body">
+    <p [innerHTML]="'HOW_TO.GOAL' | translate"></p>
+    <div [innerHTML]="'HOW_TO.RULES' | translate"></div>
+    <p [innerHTML]="'HOW_TO.DISCOVER' | translate"></p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close()">
+      {{"GLOBAL.OK" | translate }}
+    </button>
   </div>
 </ng-template>
 
@@ -117,6 +191,24 @@
   </div>
   <div class="modal-body">
     <p [innerHTML]="'BLOCKLY.SELF_DEFINED_ACTION' | translate:recursiveActionName"></p>
+  </div>
+</ng-template>
+
+<ng-template #exitConfirmContent let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title">{{"GLOBAL.WARNING" | translate }}</h6>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p>{{ (gameLaunched ? "BLOCKLY.EXIT_WARNING_IN_GAME" : "BLOCKLY.EXIT_WARNING") | translate }}</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close(false)">
+      {{"GLOBAL.CANCEL" | translate }}
+    </button>
+    <button type="button" class="btn btn-danger" (click)="modal.close(true)">
+      {{"BLOCKLY.EXIT_CONFIRM" | translate }}
+    </button>
   </div>
 </ng-template>
 

@@ -9,9 +9,7 @@
  * or see the "LICENSE.txt" file for more details.
  */
 
-import {Component, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {initializeApp} from 'firebase/app';
-import {getAnalytics} from 'firebase/analytics';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SwUpdate, VersionReadyEvent} from '@angular/service-worker';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +17,7 @@ import {LocalStorageService} from './services/local-storage.service';
 import {filter} from 'rxjs/operators';
 import {SupportedLanguagesServices} from './services/supported-languages-service';
 import {RouterOutlet} from '@angular/router';
+import {FirebaseAppService} from './services/firebase-app.service';
 
 @Component({
   selector: 'app-root',
@@ -33,25 +32,14 @@ export class AppComponent implements OnInit, OnDestroy {
     public translate: TranslateService,
     supportedLanguagesServices: SupportedLanguagesServices,
     private modalService: NgbModal,
-    localStorageService: LocalStorageService
+    localStorageService: LocalStorageService,
+    firebaseAppService: FirebaseAppService
   ) {
     if (supportedLanguagesServices.getCurrentLangInfo().rtl) {
       document.dir = 'rtl';
     }
 
-    const firebaseConfig = {
-      apiKey: 'AIzaSyBJYl1nuRbzgwjewoCaqYPc_5Sr17ussoc',
-      authDomain: 'supercodingball.firebaseapp.com',
-      projectId: 'supercodingball',
-      storageBucket: 'supercodingball.appspot.com',
-      messagingSenderId: '488172291868',
-      appId: '1:488172291868:web:48fcb92d01c23ef3695cd9',
-      measurementId: 'G-N0RFS9M9XJ'
-    };
-    const app = initializeApp(firebaseConfig);
-    if (!isDevMode() && !localStorageService.getTrackingDisabledStatus()) {
-      getAnalytics(app);
-    }
+    firebaseAppService.enableAnalytics(localStorageService.getTrackingDisabledStatus());
   }
 
   ngOnInit(): void {

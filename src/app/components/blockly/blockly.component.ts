@@ -26,6 +26,13 @@ import {TouchDevicesService} from '../../services/touch-devices.service';
 import {firstValueFrom} from 'rxjs';
 import {Girl1Icon, Girl2Icon, Guy1Icon, Guy2Icon, IDebugIcon} from './debug-icons';
 import {CommonModule} from '@angular/common';
+import {
+  CHARACTER_POSITIONS,
+  CharacterPosition,
+  getPlayableCharacter,
+  PLAYABLE_CHARACTERS,
+  PlayableCharacter
+} from '../../models/playable-character';
 const actionBlockTypes = ['shoot', 'move', 'sprint', 'call_for_ball'];
 
 @Component({
@@ -56,6 +63,16 @@ export class BlocklyComponent implements OnInit, OnDestroy {
   readonly isOnline: boolean;
   private readonly opponentId: string;
   debug: boolean;
+  readonly playableCharacters = PLAYABLE_CHARACTERS;
+  readonly characterPositions = CHARACTER_POSITIONS;
+
+  get selectedCharacter(): PlayableCharacter {
+    return getPlayableCharacter(this.localStorageService.getSelectedCharacterId());
+  }
+
+  get selectedCharacterPosition(): CharacterPosition {
+    return this.localStorageService.getSelectedCharacterPosition();
+  }
 
   constructor(
     private localStorageService: LocalStorageService,
@@ -192,7 +209,20 @@ export class BlocklyComponent implements OnInit, OnDestroy {
     }
   }
 
+  openExitConfirmPopup(content: TemplateRef<any>): void {
+    this.modalService.open(content)
+      .result.then((exitValidated: boolean) => {
+        if (exitValidated) {
+          this.backToOpponentsList();
+        }
+      }, () => { });
+  }
+
   backToOpponentsList(): void {
+    if (this.gameLaunched) {
+      this.gameComponent?.stopGame();
+      this.gameLaunched = false;
+    }
     if (this.isOnline) {
       this.router.navigate(['/online-opponents']);
     } else {
@@ -208,6 +238,44 @@ export class BlocklyComponent implements OnInit, OnDestroy {
           this.workspace?.setScale(1);
         }
       }, () => { });
+  }
+
+  openHowTo(content: TemplateRef<any>): void {
+    const resumeAfterHelp = this.gameLaunched && this.gameComponent && !this.gameComponent.gamePaused;
+    if (this.gameLaunched && this.gameComponent) {
+      this.gameComponent.gamePaused = true;
+    }
+
+    this.modalService.open(content, {size: 'lg', scrollable: true})
+      .result.then(() => {
+        if (resumeAfterHelp) {
+          this.gameComponent!.gamePaused = false;
+        }
+      }, () => {
+        if (resumeAfterHelp) {
+          this.gameComponent!.gamePaused = false;
+        }
+      });
+  }
+
+  selectCharacter(character: PlayableCharacter): void {
+    this.localStorageService.setSelectedCharacterId(character.id);
+  }
+
+  selectCharacterPosition(position: CharacterPosition): void {
+    this.localStorageService.setSelectedCharacterPosition(position);
+    this.localStorageService.setCharacterAtPosition(position, this.selectedCharacter.id);
+    this.gameComponent?.refreshSelectedCharacter();
+  }
+
+  playerAssetAt(position: CharacterPosition, originalAsset: string): string {
+    const characterId = this.localStorageService.getCharacterAtPosition(position);
+    return characterId ? getPlayableCharacter(characterId).spriteAsset : originalAsset;
+  }
+
+  portraitAtPosition(position: CharacterPosition): string {
+    const characterId = this.localStorageService.getCharacterAtPosition(position);
+    return characterId ? getPlayableCharacter(characterId).portraitAsset : 'assets/icons/user-solid.png';
   }
 
   loadBlocksFromLocalStorage(workspace: WorkspaceSvg): void {

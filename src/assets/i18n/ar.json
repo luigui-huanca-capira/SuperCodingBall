@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "اللعب عبر الإنترنت!",
     "BUTTON_HOW_TO": "كيف نلعب؟",
     "BUTTON_ABOUT": "مزيد من المعلومات",
+    "BUTTON_DELETE_ACCOUNT": "حذف الحساب",
     "CONNECTION_WARNING": "يجب أن تكون متصلاً بالإنترنت للعب عبر الإنترنت!",
-    "STRONG_ENOUGH_WARNING": "يجب عليك أولاً هزيمة 3 فرق من الكمبيوتر قبل اللعب عبر الإنترنت!"
+    "STRONG_ENOUGH_WARNING": "يجب عليك أولاً هزيمة 3 فرق من الكمبيوتر قبل اللعب عبر الإنترنت!",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "لحذف حساب، سجّل الدخول أولاً من <strong>اللعب عبر الإنترنت</strong>."
   },
   "HOW_TO": {
     "TITLE": "كيف نلعب؟",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "إذا سجلت الدخول كضيف، يمكنك اللعب مثل الآخرين، ولكن لن يكون لديك صورة شخصية.<br><br>لن تتمكن من استرجاع حسابك على جهاز آخر، وإذا قمت بتسجيل الخروج، سيتم فقدان ترتيبك!",
     "CONNECT_WITH_FACEBOOK": "تسجيل الدخول باستخدام فيسبوك",
     "CONNECT_WITH_GOOGLE": "تسجيل الدخول باستخدام جوجل",
+    "CONNECTION_ERROR": "تعذر الاتصال. تحقق من إعدادات Firebase ثم حاول مرة أخرى.",
+    "ANONYMOUS_AUTH_DISABLED": "رفض Firebase اتصال الضيف لأن تسجيل الدخول المجهول غير مفعل. في Firebase Console فعّل Authentication > Sign-in method > Anonymous.",
+    "AUTH_ERROR": "رفض Firebase تسجيل الدخول. تحقق من تفعيل مزود المصادقة ومن السماح بالنطاق المحلي.",
+    "DATA_ERROR": "تم تسجيل الدخول، لكن تعذر تحميل البيانات عبر الإنترنت. تحقق من Realtime Database والقواعد الخاصة بها.",
     "PERSONAL_RANK": "ترتيبك الحالي:",
     "RANKING": "ترتيب آخر 15 يومًا",
     "OPP_POINTS": "نقاط",

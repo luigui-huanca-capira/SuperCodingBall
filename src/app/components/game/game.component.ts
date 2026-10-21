@@ -9,7 +9,7 @@
  * or see the "LICENSE.txt" file for more details.
  */
 
-import {AfterViewInit, Component, EventEmitter, Input, isDevMode, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, isDevMode, OnDestroy, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
 import {Player, PlayerState} from '../../models/player';
 import {Ball} from '../../models/ball';
 import {Sprite, SpriteCoord} from '../../models/sprite';
@@ -20,6 +20,8 @@ import {LocalStorageService} from '../../services/local-storage.service';
 import {OnlineService} from '../../services/online.service';
 import {GamePoint} from '../online-opponents/online-opponents.component';
 import {TranslatePipe} from '@ngx-translate/core';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {getCharacterPosition, getPlayableCharacter} from '../../models/playable-character';
 
 
 interface FieldDivision {
@@ -64,11 +66,14 @@ const teammatesCollisionDist = 20;
 const ballCatchingDistance = 20;
 const moveThreshold = 15;
 const shotVelocityErrorMargin = 10 / 100;
-const shotVelocityMax = 18;
+const shotVelocityMax = 22;
 const shotAngleErrorMargin = 10; // in degrees
-const ballOwnerVelocity = 0.8;
-const nonBallOwnerVelocity = 1;
-const sprintingVelocityFactor = 2;
+const ballOwnerVelocity = 1.1;
+const nonBallOwnerVelocity = 1.35;
+const sprintingVelocityFactor = 2.2;
+const normalTicksPerSecond = 15;
+const acceleratedTicksPerSecond = 90;
+const maxSimulationStepsPerFrame = 6;
 
 @Component({
   selector: 'app-game',
@@ -82,10 +87,13 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('kickOffHalfTimeContent') private kickOffHalfTimeContent: any;
   @ViewChild('kickOffGoalContent') private kickOffGoalContent: any;
   @ViewChild('endGameContent') private endGameContent: any;
+  @ViewChild('howToContent') private howToContent: any;
   @Input() gameLaunched = true;
   @Output() lastBlockIds = new EventEmitter<string[]>();
 
   DisplayType = DisplayType;
+  readonly youtubeAmbienceUrl: SafeResourceUrl;
+  youtubeAmbienceActive = false;
   isOnline: boolean;
   opponentId = '';
   ownTeamWillStart = true;
@@ -103,8 +111,12 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.localStorageService.setAcceleratedGameStatus(accelerated);
   }
 
-  get maxFramesPerSecond(): number {
-    return this.acceleratedGame && (this.periodType === PeriodType.FirstPeriod || this.periodType === PeriodType.SecondPeriod) ? 60 : 15;
+  get soundEnabled(): boolean {
+    return this.localStorageService.getGameSoundEnabledStatus();
+  }
+
+  get targetTicksPerSecond(): number {
+    return this.acceleratedGame && (this.periodType === PeriodType.FirstPeriod || this.periodType === PeriodType.SecondPeriod) ? acceleratedTicksPerSecond : normalTicksPerSecond;
   }
 
   gameClock = 0;
@@ -116,21 +128,18 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   private fieldContext!: CanvasRenderingContext2D;
   private ownerMark!: HTMLImageElement;
   private scorerMark!: HTMLImageElement;
-  private players = [
-    new Player('girl1', true, true, true),
-    new Player('guy1', true, true, false),
-    new Player('girl2', true, false, true),
-    new Player('guy2', true, false, false),
-    new Player('orc', false, true, true),
-    new Player('wolf', false, true, false),
-    new Player('zombie', false, false, true),
-    new Player('lizard', false, false, false)
-  ];
+  private players: Player[] = [];
   private ball = new Ball();
   private enteringCode = '';
   private celebratingCode = '';
   private ownCode = '';
   private oppCode = '';
+  private lastLoopTimestamp = 0;
+  private tickRemainder = 0;
+  private audioContext?: AudioContext;
+  private ambientSource?: AudioBufferSourceNode;
+  private ambientGain?: GainNode;
+  private youtubeVolumeTimer?: number;
 
   constructor(
     private codeService: CodeService,
@@ -138,11 +147,51 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private localStorageService: LocalStorageService,
     private router: Router,
     private route: ActivatedRoute,
-    public modalService: NgbModal
+    public modalService: NgbModal,
+    private sanitizer: DomSanitizer
   ) {
     this.computeGridPositions();
+    this.players = this.createPlayers();
     this.isOnline = this.router.url.includes('/online/');
     this.opponentId = this.route.snapshot.paramMap.get('id') ?? '';
+    this.youtubeAmbienceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+      'https://www.youtube.com/embed/O-yqZreHwqc?autoplay=1&loop=1&playlist=O-yqZreHwqc&controls=0&disablekb=1&playsinline=1&enablejsapi=1'
+    );
+  }
+
+  private createPlayers(): Player[] {
+    const players = [
+      new Player('girl1', true, true, true),
+      new Player('guy1', true, true, false),
+      new Player('girl2', true, false, true),
+      new Player('guy2', true, false, false),
+      new Player('orc', false, true, true),
+      new Player('wolf', false, true, false),
+      new Player('zombie', false, false, true),
+      new Player('lizard', false, false, false)
+    ];
+
+    for (const position of ['attacker-left', 'attacker-right', 'defender-left', 'defender-right'] as const) {
+      const characterId = this.localStorageService.getCharacterAtPosition(position);
+      if (!characterId) {
+        continue;
+      }
+      const selectedCharacter = getPlayableCharacter(characterId);
+      const playerIndex = getCharacterPosition(position).playerIndex;
+      const player = players[playerIndex];
+      players[playerIndex] = new Player(
+        selectedCharacter.spriteAsset,
+        player.ownTeam,
+        player.isAtkRole,
+        player.isRightSide
+      );
+    }
+    return players;
+  }
+
+  refreshSelectedCharacter(): void {
+    this.players = this.createPlayers();
+    this.positionPlayersAndBallBeforeEntry();
   }
 
   ngOnInit(): void {
@@ -176,6 +225,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.displayType === DisplayType.Hidden) {
       return;
     }
+    // Selecting a level creates this visible game component.
+    // Start the ambience softly as soon as the level screen is ready.
+    setTimeout(() => this.enableAudio());
     this.oppCode = await this.codeService.loadOppCode(this.isOnline, this.opponentId);
     this.ownerMark = new Image();
     this.ownerMark.src = 'assets/icons/owner-mark.png';
@@ -196,7 +248,71 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.gameStopped = true;
+    this.youtubeAmbienceActive = false;
+    this.clearYoutubeVolumeTimer();
+    this.stopStadiumAmbience();
+    void this.audioContext?.close();
     this.modalService.dismissAll();
+  }
+
+  public enableAudio(): void {
+    if (!this.soundEnabled) {
+      return;
+    }
+
+    if (navigator.onLine) {
+      this.youtubeAmbienceActive = true;
+    }
+
+    this.ensureAudioContext();
+    if (this.audioContext?.state === 'suspended') {
+      void this.audioContext.resume();
+    }
+    if (!navigator.onLine) {
+      this.startStadiumAmbience();
+    }
+  }
+
+  public toggleSound(): void {
+    const enabled = !this.soundEnabled;
+    this.localStorageService.setGameSoundEnabledStatus(enabled);
+    if (enabled) {
+      this.enableAudio();
+    } else {
+      this.youtubeAmbienceActive = false;
+      this.clearYoutubeVolumeTimer();
+      this.stopStadiumAmbience();
+    }
+  }
+
+  public onYoutubeAmbienceLoaded(event: Event): void {
+    const iframe = event.target as HTMLIFrameElement;
+    const sendCommand = (func: string, args: number[] = []) => {
+      iframe.contentWindow?.postMessage(JSON.stringify({
+        event: 'command',
+        func,
+        args
+      }), 'https://www.youtube.com');
+    };
+
+    this.clearYoutubeVolumeTimer();
+    let volume = 5;
+    sendCommand('setVolume', [volume]);
+    sendCommand('playVideo');
+    this.youtubeVolumeTimer = window.setInterval(() => {
+      volume = Math.min(18, volume + 2);
+      sendCommand('setVolume', [volume]);
+      if (volume === 18) {
+        this.clearYoutubeVolumeTimer();
+      }
+    }, 700);
+  }
+
+  private clearYoutubeVolumeTimer(): void {
+    if (this.youtubeVolumeTimer !== undefined) {
+      window.clearInterval(this.youtubeVolumeTimer);
+      this.youtubeVolumeTimer = undefined;
+    }
   }
 
   public loadOwnCode(): void {
@@ -232,6 +348,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   kickOff(): void {
+    this.enableAudio();
     this.positionPlayersAndBallBeforeKickOff();
     this.gameHalted = false;
     if (this.periodType === PeriodType.BeforeFirstPeriod) {
@@ -276,18 +393,33 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  private async drawingLoop(lastFrameTimestamp?: number): Promise<void> {
+  private drawingLoop(timestamp = performance.now()): void {
     if (this.gameStopped) {
       return;
     }
 
-    if (!this.gamePaused) {
-      this.tickClock();
-      this.handleSprites();
+    if (!this.lastLoopTimestamp) {
+      this.lastLoopTimestamp = timestamp;
     }
 
-    if (lastFrameTimestamp) {
-      await new Promise(resolve => setTimeout(resolve, lastFrameTimestamp + 1000/this.maxFramesPerSecond - performance.now()));
+    const elapsedMilliseconds = Math.min(timestamp - this.lastLoopTimestamp, 250);
+    this.lastLoopTimestamp = timestamp;
+
+    if (!this.gamePaused) {
+      this.tickRemainder += elapsedMilliseconds;
+      const tickDuration = 1000 / this.targetTicksPerSecond;
+      let steps = 0;
+
+      while (this.tickRemainder >= tickDuration && steps < maxSimulationStepsPerFrame) {
+        this.tickClock();
+        this.handleSprites();
+        this.tickRemainder -= tickDuration;
+        steps++;
+      }
+
+      if (steps === maxSimulationStepsPerFrame) {
+        this.tickRemainder = 0;
+      }
     }
 
     window.requestAnimationFrame(timeStamp => this.drawingLoop(timeStamp));
@@ -348,8 +480,37 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gameHalted = true;
   }
 
+  openExitConfirmPopup(content: TemplateRef<any>): void {
+    this.modalService.open(content)
+      .result.then((exitValidated: boolean) => {
+        if (exitValidated) {
+          this.backToCodeEdition();
+        }
+      }, () => { });
+  }
+
   backToCodeEdition(): void {
+    this.stopGame();
     this.router.navigate([`/code/${this.isOnline ? 'online' : 'offline'}/` + this.opponentId]);
+  }
+
+  openHowTo(): void {
+    const resumeAfterHelp = this.gameLaunched && !this.gamePaused;
+    if (this.gameLaunched) {
+      this.gamePaused = true;
+    }
+
+    this.modalService.open(this.howToContent, {size: 'lg', scrollable: true}).result.then(
+      () => {
+        if (resumeAfterHelp) {
+          this.gamePaused = false;
+        }
+      },
+      () => {
+        if (resumeAfterHelp) {
+          this.gamePaused = false;
+        }
+      });
   }
 
   private backToOpponentsList(): void {
@@ -529,6 +690,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.oppScore++;
     }
+    this.playGoalCelebration();
     const scorer = this.ball.owner ?? this.ball.formerOwner;
     this.ball.owner = null;
     for (const player of this.players) {
@@ -581,6 +743,102 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.drawSpotlight();
+  }
+
+  private ensureAudioContext(): AudioContext | undefined {
+    if (!this.audioContext) {
+      const AudioContextConstructor = window.AudioContext;
+      if (!AudioContextConstructor) {
+        return undefined;
+      }
+      this.audioContext = new AudioContextConstructor();
+    }
+    return this.audioContext;
+  }
+
+  private createCrowdNoiseBuffer(context: AudioContext, seconds: number): AudioBuffer {
+    const buffer = context.createBuffer(1, context.sampleRate * seconds, context.sampleRate);
+    const samples = buffer.getChannelData(0);
+    let smoothedNoise = 0;
+    for (let index = 0; index < samples.length; index++) {
+      smoothedNoise = smoothedNoise * 0.92 + (Math.random() * 2 - 1) * 0.08;
+      const wave = Math.sin(index / context.sampleRate * Math.PI * 2 * 1.7);
+      samples[index] = smoothedNoise * (0.72 + wave * 0.18);
+    }
+    return buffer;
+  }
+
+  private startStadiumAmbience(): void {
+    if (this.ambientSource || !this.soundEnabled) {
+      return;
+    }
+    const context = this.ensureAudioContext();
+    if (!context) {
+      return;
+    }
+
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const gain = context.createGain();
+    source.buffer = this.createCrowdNoiseBuffer(context, 4);
+    source.loop = true;
+    filter.type = 'bandpass';
+    filter.frequency.value = 850;
+    filter.Q.value = 0.35;
+    const startAt = context.currentTime;
+    gain.gain.setValueAtTime(0.015, startAt);
+    gain.gain.linearRampToValueAtTime(0.1, startAt + 6);
+    source.connect(filter).connect(gain).connect(context.destination);
+    source.start();
+    this.ambientSource = source;
+    this.ambientGain = gain;
+  }
+
+  private stopStadiumAmbience(): void {
+    this.ambientSource?.stop();
+    this.ambientSource?.disconnect();
+    this.ambientGain?.disconnect();
+    this.ambientSource = undefined;
+    this.ambientGain = undefined;
+  }
+
+  private playGoalCelebration(): void {
+    if (!this.soundEnabled) {
+      return;
+    }
+    const context = this.ensureAudioContext();
+    if (!context) {
+      return;
+    }
+
+    const startAt = context.currentTime;
+    const masterGain = context.createGain();
+    masterGain.gain.setValueAtTime(0.0001, startAt);
+    masterGain.gain.exponentialRampToValueAtTime(0.14, startAt + 0.04);
+    masterGain.gain.exponentialRampToValueAtTime(0.0001, startAt + 1.8);
+    masterGain.connect(context.destination);
+
+    [392, 523.25, 659.25].forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      oscillator.type = index === 0 ? 'square' : 'sine';
+      oscillator.frequency.setValueAtTime(frequency, startAt);
+      oscillator.frequency.linearRampToValueAtTime(frequency * 1.08, startAt + 0.65);
+      oscillator.connect(masterGain);
+      oscillator.start(startAt + index * 0.08);
+      oscillator.stop(startAt + 1.8);
+    });
+
+    const cheer = context.createBufferSource();
+    const cheerFilter = context.createBiquadFilter();
+    const cheerGain = context.createGain();
+    cheer.buffer = this.createCrowdNoiseBuffer(context, 2.2);
+    cheerFilter.type = 'bandpass';
+    cheerFilter.frequency.value = 1400;
+    cheerGain.gain.setValueAtTime(0.05, startAt);
+    cheerGain.gain.linearRampToValueAtTime(0.3, startAt + 0.18);
+    cheerGain.gain.exponentialRampToValueAtTime(0.001, startAt + 2.2);
+    cheer.connect(cheerFilter).connect(cheerGain).connect(context.destination);
+    cheer.start(startAt);
   }
 
   private drawMark(): void {

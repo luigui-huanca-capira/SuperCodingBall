@@ -38,7 +38,6 @@
                   "**/*.xml",
                   "**/*.blend",
                   "**/*.svg",
-                  "webcom-rules.json",
                   "app-icons/icon-blockly-website.png",
                   "sprites/girl1-original.png",
                   "sprites/girl2-original.png",
@@ -65,8 +64,7 @@
             "scripts": [],
             "allowedCommonJsDependencies": [
               "blockly",
-              "@blockly/field-slider",
-              "webcom/webcom-auth-sldb.js"
+              "@blockly/field-slider"
             ],
             "browser": "src/main.ts"
           },
@@ -96,6 +94,17 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "desktop": {
+              "baseHref": "./",
+              "serviceWorker": false,
+              "outputHashing": "none",
+              "fileReplacements": [
+                {
+                  "replace": "src/app/app.config.ts",
+                  "with": "src/app/app.config.desktop.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -140,5 +149,8 @@
     "@schematics/angular:resolver": {
       "typeSeparator": "."
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

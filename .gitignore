@@ -34,14 +34,44 @@ speed-measure-plugin*.json
 .history/*
 
 # misc
+/.tools
 /.sass-cache
 /connect.lock
 /coverage
 /libpeerconnection.log
+super-coding-ball-dev*.log
 npm-debug.log
 yarn-error.log
 testem.log
 /typings
+
+# local assistant and Python cache
+/.kilo/
+__pycache__/
+*.pyc
+
+# generated desktop packages
+/release/
+/release-*/
+
+# obsolete character iterations (the game uses nova-v6.png)
+/src/assets/sprites/nova.png
+/src/assets/sprites/nova-v2.png
+/src/assets/sprites/nova-v3.png
+/src/assets/sprites/nova-v4.png
+/src/assets/sprites/nova-v5.png
+
+# reports and local documentation generators
+/entregables/
+/build_v04_brief.py
+/build_v04_report.py
+/DATABASE.md
+
+# maintenance-only image generation sources
+/tools/
+/src/assets/characters/nova-ai-original.png
+/src/assets/characters/leo-ai-original.png
+/src/assets/characters/nova-directions-ai.png
 
 # System Files
 .DS_Store

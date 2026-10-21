@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "Online spielen!",
     "BUTTON_HOW_TO": "Wie spielen wir?",
     "BUTTON_ABOUT": "Mehr erfahren",
+    "BUTTON_DELETE_ACCOUNT": "Konto löschen",
     "CONNECTION_WARNING": "Du musst mit dem Internet verbunden sein, um online zu spielen!",
-    "STRONG_ENOUGH_WARNING": "Du musst erst mindestens 3 Computer-Teams besiegen, bevor du online spielen kannst!"
+    "STRONG_ENOUGH_WARNING": "Du musst erst mindestens 3 Computer-Teams besiegen, bevor du online spielen kannst!",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "Um ein Konto zu löschen, melde dich zuerst über <strong>Online spielen</strong> an."
   },
   "HOW_TO": {
     "TITLE": "Wie spielen wir?",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "Wenn du dich als Gast verbindest, kannst du wie die anderen spielen, aber du hast kein Profilbild.<br><br>Du kannst dein Konto nicht auf einem anderen Gerät finden, und wenn du dich ausloggst, geht dein Ranking verloren!",
     "CONNECT_WITH_FACEBOOK": "Mit Facebook verbinden",
     "CONNECT_WITH_GOOGLE": "Mit Google verbinden",
+    "CONNECTION_ERROR": "Verbindung nicht möglich. Prüfe die Firebase-Konfiguration und versuche es erneut.",
+    "ANONYMOUS_AUTH_DISABLED": "Firebase hat die Gastverbindung abgelehnt, weil die anonyme Anmeldung nicht aktiviert ist. Aktiviere in der Firebase Console Authentication > Sign-in method > Anonymous.",
+    "AUTH_ERROR": "Firebase hat die Anmeldung abgelehnt. Prüfe, ob der Authentifizierungsanbieter aktiviert ist und die lokale Domain autorisiert ist.",
+    "DATA_ERROR": "Die Anmeldung war erfolgreich, aber die Online-Daten konnten nicht geladen werden. Prüfe Realtime Database und die Regeln.",
     "PERSONAL_RANK": "Dein aktuelles Ranking:",
     "RANKING": "Ranking der letzten 15 Tage",
     "OPP_POINTS": "pkt",
@@ -168,11 +174,15 @@
       "TITLE": "Spielfeldübersicht mit Zielposition aller Spieler*in"
     },
     "DELETE_WARNING": "Möchtest du wirklich alle deine Blöcke löschen?",
+    "EXIT_WARNING": "Möchtest du das Spiel wirklich verlassen und zurückgehen?",
+    "EXIT_WARNING_IN_GAME": "Möchtest du das laufende Spiel wirklich abbrechen und zurückgehen?",
+    "EXIT_CONFIRM": "Spiel verlassen",
     "SELF_DEFINED_ACTION": "Du kannst <strong>{{value}}</strong> nicht in eine eigene Definition einfügen!"
   },
   "GAME": {
     "MIN": "min",
     "STOP_MODAL": "Möchtest du dieses Spiel beenden?",
+    "EXIT_WARNING": "Möchtest du das laufende Spiel wirklich abbrechen und zur Blockbearbeitung zurückkehren?",
     "KICK_OFF": "Los geht's!",
     "CLICK_ANYWHERE": "(klicke irgendwo hin)",
     "HALF_TIME": "Halbzeit",

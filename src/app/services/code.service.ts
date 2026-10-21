@@ -380,7 +380,7 @@ export class CodeService {
   }
 
   loadOwnBlocksFromServer(): Promise<string> {
-    return this.onlineService.loadUserBlocks(this.onlineService.webcomId);
+    return this.onlineService.loadUserBlocks(this.onlineService.userId);
   }
 
   private defineBlocksCodeGen(): void {

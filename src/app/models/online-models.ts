@@ -10,15 +10,15 @@
  */
 
 export class Opponent {
-  webcomId: string;
+  userId: string;
   userDisplay: UserDisplay | null;
   points: number;
   ranking: number;
   lastSeen: number;
   lastResult?: number;
 
-  constructor(webcomId: string, userDisplay: UserDisplay | null, points: number, ranking: number, lastSeen: number) {
-    this.webcomId = webcomId;
+  constructor(userId: string, userDisplay: UserDisplay | null, points: number, ranking: number, lastSeen: number) {
+    this.userId = userId;
     this.userDisplay = userDisplay;
     this.points = points;
     this.ranking = ranking;
@@ -29,7 +29,21 @@ export class Opponent {
 
 export interface User {
   displayName: string;
+  pictureUrl: string | null;
+  updatedAt: number;
+}
+
+export interface UserStrategy {
   blocks: string;
+  updatedAt: number;
+}
+
+export interface LeaderboardEntry {
+  displayName: string;
+  points: number;
+  ranking: number;
+  lastSeen: number;
+  updatedAt: number;
 }
 
 export class UserDisplay {
@@ -50,7 +64,10 @@ export type AllGames = {[dayTimestamp: string]: OneDayGames};
 
 export type OneDayGames = {[userId: string]: UserDailyRecap};
 
-type UserDailyRecap = {userDisplay: UserDisplay; dailyGames: {[opponentId: string]: number}}
+export type UserDailyRecap = {
+  userDisplay: UserDisplay;
+  dailyGames?: {[opponentId: string]: number};
+}
 
 export enum ConnectionStatus {
   Unknown,

@@ -10,17 +10,41 @@
  */
 
 import {Injectable, OnDestroy, EventEmitter} from '@angular/core';
-import Webcom from 'webcom/webcom-auth-sldb.js';
-import {AllGames, ConnectionStatus, OneDayGames, User, UserDisplay} from '../models/webcom-models';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {firstValueFrom, Observable} from 'rxjs';
+import {
+  Auth,
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  User as FirebaseUser,
+  Unsubscribe,
+  deleteUser,
+  getAuth,
+  onAuthStateChanged,
+  signInAnonymously,
+  signInWithRedirect,
+  signOut,
+  updateProfile
+} from 'firebase/auth';
+import {DataSnapshot, Database, get, getDatabase, onValue, ref, remove, set, update} from 'firebase/database';
+import {Observable} from 'rxjs';
+import {
+  AllGames,
+  ConnectionStatus,
+  LeaderboardEntry,
+  OneDayGames,
+  Opponent,
+  User,
+  UserDisplay,
+  UserStrategy
+} from '../models/online-models';
+import {FirebaseAppService} from './firebase-app.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OnlineService implements OnDestroy {
-  webcomApp = Webcom.App('super-coding-ball');
-  webcomAuth = this.webcomApp.authentication;
+  private auth: Auth;
+  private database: Database;
+  private unsubscribeAuth?: Unsubscribe;
   connectionStatusChanged = new EventEmitter<ConnectionStatus>();
   private _connectionStatus = ConnectionStatus.Unknown;
 
@@ -35,45 +59,32 @@ export class OnlineService implements OnDestroy {
     this._connectionStatus = status;
   }
 
-  authCallback: any;
-  webcomId = '';
-  authHeadersOption = {headers: new HttpHeaders()};
-  webcomDisplayName = '';
+  userId = '';
+  firebaseDisplayName = '';
   userDisplay = new UserDisplay();
   userSynced = false;
   userDisplaySetInDailyGames: {[dayTimestamp: string]: boolean} = {};
   allGames?: AllGames = undefined
-  webcomBaseUrl = 'https://io.datasync.orange.com/datasync/v2/super-coding-ball/data';
-  webcomUsersUrl = `${this.webcomBaseUrl}/users`;
-  webcomGamesUrl = `${this.webcomBaseUrl}/games`;
 
-  constructor(private http: HttpClient) {
-    this.authCallback = (error: any, authState: any) => {
-      if (error) {
-        this.deleteCredentials();
-        this.connectionStatus = ConnectionStatus.Disconnected;
-        switch (error.code) {
-          case 'INVALID_CREDENTIALS':
-            console.log('The email or password is incorrect.');
-            break;
-          case 'PROVIDER_DISABLED':
-            console.log('The email/password method is disabled in the application. It must be enabled in the Webcom developer console.');
-            break;
-          default:
-            console.log('An unexpected error occurred, please retry and contact your administrator.', error);
-        }
-      } else {
-        if (authState?.state == 'some') {
-          this.parseAuthInfo(authState.details);
+  constructor(firebaseAppService: FirebaseAppService) {
+    this.auth = getAuth(firebaseAppService.app);
+    this.database = getDatabase(firebaseAppService.app);
+    this.unsubscribeAuth = onAuthStateChanged(
+      this.auth,
+      (user: FirebaseUser | null) => {
+        if (user) {
+          this.parseAuthInfo(user);
         } else {
-          console.log(authState?.state == 'none' ? 'No authentication' : 'Authentication failed', authState);
           this.deleteCredentials();
           this.connectionStatus = ConnectionStatus.Disconnected;
         }
+      },
+      (error) => {
+        console.log('Firebase authentication failed.', error);
+        this.deleteCredentials();
+        this.connectionStatus = ConnectionStatus.Disconnected;
       }
-    };
-
-    this.webcomAuth.subscribe(this.authCallback);
+    );
   }
 
   static getUtcTimestamp(timestamp: number): number {
@@ -89,47 +100,46 @@ export class OnlineService implements OnDestroy {
 
   private deleteCredentials(): void {
     this.userDisplay = new UserDisplay();
-    this.webcomId = '';
-    this.authHeadersOption = {headers: new HttpHeaders()};
+    this.userId = '';
+    this.firebaseDisplayName = '';
   }
 
-  private parseAuthInfo(auth: any): void {
-    if (auth.provider === 'facebook') {
-      console.log('Facebook authentication succeeded', auth);
-      this.webcomDisplayName = auth.displayName;
-      this.userDisplay.pictureUrl = `https://graph.facebook.com/${auth.providerProfile.id}/picture`;
-    } else if (auth?.provider === 'google') {
-      console.log('Google authentication succeeded', auth);
-      this.webcomDisplayName = auth.displayName;
-      this.userDisplay.pictureUrl = auth.providerProfile.picture;
-    } else if (auth.provider === 'anonymous') {
-      console.log('Anonymous authentication succeeded', auth);
-      this.webcomDisplayName = 'Team-' + auth.uid.substring(0, 4);
-    }
-    this.webcomId = auth.uid;
-    this.authHeadersOption = {headers: new HttpHeaders().set('Authorization', 'Bearer ' + auth.webcomAuthToken)};
+  private parseAuthInfo(user: FirebaseUser): void {
+    this.firebaseDisplayName = user.displayName || 'Team-' + user.uid.substring(0, 4);
+    this.userDisplay.fullDisplayName = this.firebaseDisplayName;
+    this.userDisplay.pictureUrl = user.photoURL;
+    this.userId = user.uid;
     this.connectionStatus = ConnectionStatus.Connected;
   }
 
+  private snapshotToValue<T>(snapshot: DataSnapshot, defaultValue: T): T {
+    const value = snapshot.val();
+    return value === null ? defaultValue : value as T;
+  }
+
   ngOnDestroy(): void {
-    this.webcomAuth.unsubscribe(this.authCallback);
+    this.unsubscribeAuth?.();
   }
 
-  public connectAnonymously(): void {
-    this.webcomAuth.signInAsGuest();
+  public connectAnonymously(): Promise<void> {
+    return signInAnonymously(this.auth).then(() => undefined);
   }
 
-  public connectWithFacebook(): void {
-    this.webcomAuth.signInWithOAuth('facebook', {mode: 'redirect', scope: 'public_profile'});
+  public connectWithFacebook(): Promise<void> {
+    const provider = new FacebookAuthProvider();
+    provider.addScope('public_profile');
+    return signInWithRedirect(this.auth, provider);
   }
 
-  public connectWithGoogle(): void {
-    this.webcomAuth.signInWithOAuth('google', {mode: 'redirect', scope: 'profile'});
+  public connectWithGoogle(): Promise<void> {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    return signInWithRedirect(this.auth, provider);
   }
 
-  public disconnect(): void {
+  public async disconnect(): Promise<void> {
     this.resetUser();
-    this.webcomAuth.signOut();
+    await signOut(this.auth);
   }
 
   public resetUser(): void {
@@ -137,23 +147,62 @@ export class OnlineService implements OnDestroy {
     this.userDisplaySetInDailyGames = {};
   }
 
-  public removeAccount(): void {
-    firstValueFrom(this.http.delete(`${this.webcomUsersUrl}/${this.webcomId}`, this.authHeadersOption))
-    for (let pastDayCount = 0; pastDayCount < 15; pastDayCount++) {
-      const pastDayTimestamp = OnlineService.getUtcTimestamp(Date.now() - pastDayCount * 1000 * 60 * 60 * 24);
-      firstValueFrom(this.http.delete(`${this.webcomGamesUrl}/${pastDayTimestamp}/${this.webcomId}`, this.authHeadersOption));
+  public async removeAccount(): Promise<void> {
+    const currentUser = this.auth.currentUser;
+    const userId = this.userId;
+    if (!currentUser || !userId) {
+      return;
+    }
+
+    await Promise.all([
+      remove(ref(this.database, `users/${userId}`)),
+      remove(ref(this.database, `strategies/${userId}`)),
+      remove(ref(this.database, `leaderboard/${userId}`)),
+      this.removeUserGames(userId)
+    ]);
+    await deleteUser(currentUser);
+    this.resetUser();
+    this.deleteCredentials();
+    this.connectionStatus = ConnectionStatus.Disconnected;
+  }
+
+  private async removeUserGames(userId: string): Promise<void> {
+    const gamesSnapshot = await get(ref(this.database, 'games'));
+    if (!gamesSnapshot.exists()) {
+      return;
+    }
+
+    const updates: {[path: string]: null} = {};
+    gamesSnapshot.forEach(daySnapshot => {
+      const dayTimestamp = daySnapshot.key;
+      if (dayTimestamp && daySnapshot.child(userId).exists()) {
+        updates[`games/${dayTimestamp}/${userId}`] = null;
+      }
+    });
+
+    if (Object.keys(updates).length) {
+      await update(ref(this.database), updates);
     }
   }
 
   async syncUser(blocks: string): Promise<void> {
-    if (!this.userSynced) {
-      const currentUser = await firstValueFrom(this.http.get<User | null>(`${this.webcomUsersUrl}/${this.webcomId}`, this.authHeadersOption));
+    if (!this.userSynced && this.userId) {
+      const userSnapshot = await get(ref(this.database, `users/${this.userId}`));
+      const currentUser = this.snapshotToValue<User | null>(userSnapshot, null);
       if (!!currentUser?.displayName) {
         this.userDisplay.fullDisplayName = currentUser.displayName;
       } else {
-        this.userDisplay.fullDisplayName = this.webcomDisplayName;
+        this.userDisplay.fullDisplayName = this.firebaseDisplayName;
       }
-      if (!currentUser?.blocks) {
+      if (currentUser?.pictureUrl !== undefined) {
+        this.userDisplay.pictureUrl = currentUser.pictureUrl;
+      }
+
+      await this.updateUserRecord();
+
+      const strategySnapshot = await get(ref(this.database, `strategies/${this.userId}`));
+      const currentStrategy = this.snapshotToValue<UserStrategy | null>(strategySnapshot, null);
+      if (!currentStrategy?.blocks) {
         await this.updateUserBlocks(blocks);
       }
 
@@ -161,20 +210,46 @@ export class OnlineService implements OnDestroy {
     }
   }
 
+  private async updateUserRecord(): Promise<void> {
+    if (!this.userId) {
+      return;
+    }
+
+    const user: User = {
+      displayName: this.userDisplay.displayName,
+      pictureUrl: this.userDisplay.pictureUrl,
+      updatedAt: Date.now()
+    };
+    await update(ref(this.database, `users/${this.userId}`), user);
+  }
+
   async updateUserDisplayName(displayName: string): Promise<void> {
-    await firstValueFrom(this.http.patch(`${this.webcomUsersUrl}/${this.webcomId}`, {displayName}, this.authHeadersOption));
+    this.userDisplay.fullDisplayName = displayName;
+    if (this.auth.currentUser) {
+      await updateProfile(this.auth.currentUser, {displayName: this.userDisplay.displayName});
+    }
+    await this.updateUserRecord();
   }
 
   async updateUserBlocks(blocks: string): Promise<void> {
-    await firstValueFrom(this.http.patch(`${this.webcomUsersUrl}/${this.webcomId}`, {blocks}, this.authHeadersOption));
+    if (!this.userId) {
+      return;
+    }
+
+    await update(ref(this.database, `strategies/${this.userId}`), {
+      blocks,
+      updatedAt: Date.now()
+    });
   }
 
   async setUserDisplayInDailyGames(): Promise<void> {
+    if (!this.userId) {
+      return;
+    }
+
     const today = OnlineService.getUtcTimestamp(Date.now());
     if (!this.userDisplaySetInDailyGames[today]) {
-      await firstValueFrom(
-        this.http.put<UserDisplay>(`${this.webcomGamesUrl}/${today}/${this.webcomId}/userDisplay`, this.userDisplay, this.authHeadersOption)
-      );
+      await set(ref(this.database, `games/${today}/${this.userId}/userDisplay`), this.userDisplay);
       this.userDisplaySetInDailyGames[today] = true
     }
   }
@@ -184,7 +259,6 @@ export class OnlineService implements OnDestroy {
     const allTimeStamps = Object.keys(allGames);
     for (const timestamp of allTimeStamps) {
       if (+timestamp < Date.now() - 15 * 1000 * 60 * 60 * 24) {
-        this.deleteDay(timestamp);
         delete allGames[timestamp];
       }
     }
@@ -198,44 +272,61 @@ export class OnlineService implements OnDestroy {
   private async loadAllGamesOrRefreshTodayGames(): Promise<AllGames> {
     const allGames = this.allGames;
     if (!allGames) {
-      return await firstValueFrom(this.http.get<AllGames>(this.webcomGamesUrl, this.authHeadersOption));
+      const gamesSnapshot = await get(ref(this.database, 'games'));
+      return this.snapshotToValue<AllGames>(gamesSnapshot, {});
     } else {
       const today = OnlineService.getUtcTimestamp(Date.now());
-      const todayGames = await firstValueFrom(this.http.get<OneDayGames>(`${this.webcomGamesUrl}/${today}`, this.authHeadersOption))
-      allGames[today] = todayGames;
+      const todayGamesSnapshot = await get(ref(this.database, `games/${today}`));
+      allGames[today] = this.snapshotToValue<OneDayGames>(todayGamesSnapshot, {});
       return allGames
     }
   }
 
   syncTodayGames(): Observable<AllGames> {
-    const webcomData = this.webcomApp.serverlessDb;
     const today = OnlineService.getUtcTimestamp(Date.now());
-    const todayNode = webcomData.rootNode.relativeNode(`games/${today}`);
+    const todayGamesRef = ref(this.database, `games/${today}`);
     return new Observable<AllGames>((subscriber) => {
-      let mySubscription: any;
-      todayNode.subscribe(Webcom.ServerlessDb.Event.ValueChange, Webcom.ServerlessDb.Callback((snapshot: any) => {
-        let allGames = this.allGames ?? {};
-        allGames[today] = snapshot.val();
-        subscriber.next(allGames);
-      }))
-        .then((subscription: any) => mySubscription = subscription)
+      const unsubscribe = onValue(
+        todayGamesRef,
+        (snapshot) => {
+          const allGames = this.allGames ?? {};
+          allGames[today] = this.snapshotToValue<OneDayGames>(snapshot, {});
+          this.allGames = allGames;
+          subscriber.next(allGames);
+        },
+        (error) => subscriber.error(error)
+      );
 
-      return () => {
-        mySubscription.cancel();
-      };
+      return () => unsubscribe();
     })
   }
 
-  async deleteDay(dayTimestamp: string): Promise<void> {
-    await firstValueFrom(this.http.delete<any>(`${this.webcomGamesUrl}/${dayTimestamp}`, this.authHeadersOption));
-  }
-
   async loadUserBlocks(userId: string): Promise<string> {
-    return await firstValueFrom(this.http.get<string>(`${this.webcomUsersUrl}/${userId}/blocks`, this.authHeadersOption));
+    const strategySnapshot = await get(ref(this.database, `strategies/${userId}/blocks`));
+    return this.snapshotToValue<string>(strategySnapshot, '{}');
   }
 
   async setGameResult(opponentId: string, points: number): Promise<void> {
+    if (!this.userId) {
+      return;
+    }
+
     const today = OnlineService.getUtcTimestamp(Date.now());
-    await firstValueFrom(this.http.put(`${this.webcomGamesUrl}/${today}/${this.webcomId}/dailyGames/${opponentId}`, points, this.authHeadersOption));
+    await set(ref(this.database, `games/${today}/${this.userId}/dailyGames/${opponentId}`), points);
+  }
+
+  async updateLeaderboard(opponent: Opponent | undefined): Promise<void> {
+    if (!this.userId || !opponent) {
+      return;
+    }
+
+    const leaderboardEntry: LeaderboardEntry = {
+      displayName: this.userDisplay.displayName,
+      points: opponent.points,
+      ranking: opponent.ranking,
+      lastSeen: opponent.lastSeen,
+      updatedAt: Date.now()
+    };
+    await set(ref(this.database, `leaderboard/${this.userId}`), leaderboardEntry);
   }
 }

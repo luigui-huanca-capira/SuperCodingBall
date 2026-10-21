@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "オンラインでプレイしましょう！",
     "BUTTON_HOW_TO": "どうやって遊ぶの？",
     "BUTTON_ABOUT": "詳細はこちら",
+    "BUTTON_DELETE_ACCOUNT": "アカウントを削除",
     "CONNECTION_WARNING": "オンラインでプレイするにはインターネットに接続する必要があります。",
-    "STRONG_ENOUGH_WARNING": "オンラインでプレイする前に、まず少なくとも 3 つのコンピュータ チームに勝つ必要があります。"
+    "STRONG_ENOUGH_WARNING": "オンラインでプレイする前に、まず少なくとも 3 つのコンピュータ チームに勝つ必要があります。",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "アカウントを削除するには、先に<strong>オンラインでプレイ</strong>からログインしてください。"
   },
   "HOW_TO": {
     "TITLE": "どうやって遊ぶの？",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "ゲストとして接続すると、他のユーザーと同じようにプレイできますが、プロフィール写真は表示されません。<br><br>別のデバイスでアカウントを見つけることはできません。また、ログアウトするとランキングが失われます。",
     "CONNECT_WITH_FACEBOOK": "Facebookでつながる",
     "CONNECT_WITH_GOOGLE": "Googleとつながる",
+    "CONNECTION_ERROR": "接続できませんでした。Firebase の設定を確認して、もう一度試してください。",
+    "ANONYMOUS_AUTH_DISABLED": "匿名ログインが有効になっていないため、Firebase がゲスト接続を拒否しました。Firebase Console で Authentication > Sign-in method > Anonymous を有効にしてください。",
+    "AUTH_ERROR": "Firebase がログインを拒否しました。認証プロバイダーが有効で、ローカルドメインが承認されていることを確認してください。",
+    "DATA_ERROR": "ログインは成功しましたが、オンラインデータを読み込めませんでした。Realtime Database とルールを確認してください。",
     "PERSONAL_RANK": "現在のランキング:",
     "RANKING": "過去15日間のランキング",
     "OPP_POINTS": "ポイント",

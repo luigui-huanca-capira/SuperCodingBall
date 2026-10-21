@@ -72,8 +72,10 @@
      "BUTTON_PLAY_ONLINE": "שחק באינטרנט!",
      "BUTTON_HOW_TO": "איך משחקים?",
      "BUTTON_ABOUT": "למידע נוסף",
+     "BUTTON_DELETE_ACCOUNT": "מחיקת חשבון",
      "CONNECTION_WARNING": "עליך להיות מחובר לאינטרנט כדי לשחק באינטרנט!",
-     "STRONG_ENOUGH_WARNING": "תחילה עליך לנצח לפחות 3 קבוצות מחשבים לפני שתשחק באינטרנט!"
+     "STRONG_ENOUGH_WARNING": "תחילה עליך לנצח לפחות 3 קבוצות מחשבים לפני שתשחק באינטרנט!",
+     "DELETE_ACCOUNT_LOGIN_REQUIRED": "כדי למחוק חשבון, התחבר תחילה דרך <strong>שחק באינטרנט</strong>."
    },
    "HOW_TO": {
      "TITLE": "איך משחקים?",
@@ -138,6 +140,10 @@
      "GUEST_WARNING": "אם אתה התחבר כאורח, תוכל לשחק כמו האחרים, אבל לא תהיה לך תמונת הפרופיל שלך.<br><br>לא תוכל למצוא את החשבון שלך במכשיר אחר, ואם תתנתק, הדירוג יאבד!",
      "CONNECT_WITH_FACEBOOK": "התחבר לפייסבוק",
      "CONNECT_WITH_GOOGLE": "התחבר עם Google",
+     "CONNECTION_ERROR": "לא ניתן להתחבר. בדוק את הגדרות Firebase ונסה שוב.",
+     "ANONYMOUS_AUTH_DISABLED": "Firebase דחה את חיבור האורח כי התחברות אנונימית אינה מופעלת. ב-Firebase Console הפעל Authentication > Sign-in method > Anonymous.",
+     "AUTH_ERROR": "Firebase דחה את ההתחברות. בדוק שספק האימות מופעל ושהדומיין המקומי מורשה.",
+     "DATA_ERROR": "ההתחברות הצליחה, אך לא ניתן לטעון את הנתונים המקוונים. בדוק את Realtime Database ואת הכללים.",
      "PERSONAL_RANK": "הדירוג הנוכחי שלך:",
      "RANKING": "דירוג 15 הימים האחרונים",
      "OPP_POINTS": "נקודות",
@@ -168,6 +174,9 @@
        "TITLE": "סקירת שדה עם מיקום היעד של כל שחקן"
      },
      "DELETE_WARNING": "אתה באמת רוצה למחוק את כל הבלוקים שלך!?",
+     "EXIT_WARNING": "האם אתה בטוח שברצונך לצאת מהמשחק ולחזור אחורה?",
+     "EXIT_WARNING_IN_GAME": "האם אתה בטוח שברצונך לעזוב את המשחק הנוכחי ולחזור אחורה?",
+     "EXIT_CONFIRM": "צא מהמשחק",
      "SELF_DEFINED_ACTION": "אתה לא יכול לשים את <strong>{{value}}</strong> בהגדרה של עצמה!"
    },
    "GAME": {

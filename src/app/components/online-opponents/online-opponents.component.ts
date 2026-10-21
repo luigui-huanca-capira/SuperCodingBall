@@ -10,7 +10,7 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {AllGames, ConnectionStatus, Opponent} from '../../models/webcom-models';
+import {AllGames, ConnectionStatus, Opponent} from '../../models/online-models';
 import {OnlineService} from '../../services/online.service';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Subscription} from 'rxjs';
@@ -38,6 +38,7 @@ export enum GamePoint {
 export class OnlineOpponentsComponent implements OnInit, OnDestroy {
   @ViewChild('replayGameContent') private replayGameContent: any;
   @ViewChild('deleteAccountContent') private deleteAccountContent: any;
+  @ViewChild('connectionErrorContent') private connectionErrorContent: any;
   GamePoint = GamePoint;
   public ConnectionStatus = ConnectionStatus;
   private connectionStatusSubscription?: Subscription;
@@ -46,6 +47,7 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
   lastResult?: number;
   personalRanking = 0;
   loading = false;
+  connectionErrorKey = 'ONLINE.CONNECTION_ERROR';
   modalParams = {
     won: '<img src="assets/icons/trophy-solid-warning.png" class="icon24"/>',
     draw: '<img src="assets/icons/trophy-solid-secondary.png" class="icon24"/>',
@@ -95,13 +97,13 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.onlineService.connectionStatus === ConnectionStatus.Connected) {
-      this.loadData();
+      void this.loadData();
     }
     this.connectionStatusSubscription = this.onlineService.connectionStatusChanged.subscribe(
       status => {
         this.loading = false;
         if (status === ConnectionStatus.Connected) {
-          this.loadData();
+          void this.loadData();
         }
       }
     );
@@ -115,11 +117,57 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
 
   async loadData(): Promise<void> {
     this.loading = true;
-    await this.onlineService.syncUser(this.codeService.loadOwnBlocksFromLocalStorage());
-    await this.onlineService.setUserDisplayInDailyGames();
-    const allGames = await this.onlineService.loadGamesAndRemoveOldOnes();
+    try {
+      await this.onlineService.syncUser(this.codeService.loadOwnBlocksFromLocalStorage());
+      await this.onlineService.setUserDisplayInDailyGames();
+      const allGames = await this.onlineService.loadGamesAndRemoveOldOnes();
+      this.computeLeaderBoard(allGames)
+    } catch (error) {
+      this.showConnectionError(error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async connectAnonymously(): Promise<void> {
+    await this.connect(() => this.onlineService.connectAnonymously());
+  }
+
+  async connectWithFacebook(): Promise<void> {
+    await this.connect(() => this.onlineService.connectWithFacebook());
+  }
+
+  async connectWithGoogle(): Promise<void> {
+    await this.connect(() => this.onlineService.connectWithGoogle());
+  }
+
+  private async connect(connectAction: () => Promise<void>): Promise<void> {
+    this.loading = true;
+    try {
+      await connectAction();
+    } catch (error) {
+      this.showConnectionError(error);
+    }
+  }
+
+  private showConnectionError(error: unknown): void {
+    console.log('Online connection failed.', error);
+    this.connectionErrorKey = this.getConnectionErrorKey(error);
     this.loading = false;
-    this.computeLeaderBoard(allGames)
+    setTimeout(() => this.modalService.open(this.connectionErrorContent, {size: 'sm'}));
+  }
+
+  private getConnectionErrorKey(error: unknown): string {
+    const code = typeof error === 'object' && error !== null && 'code' in error
+      ? (error as {code?: unknown}).code
+      : undefined;
+    if (code === 'auth/admin-restricted-operation') {
+      return 'ONLINE.ANONYMOUS_AUTH_DISABLED';
+    }
+    if (typeof code === 'string' && code.startsWith('auth/')) {
+      return 'ONLINE.AUTH_ERROR';
+    }
+    return 'ONLINE.DATA_ERROR';
   }
 
   computeLeaderBoard(allGames: AllGames) {
@@ -132,20 +180,21 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
       // with 0 points from the past days
       .filter(opponent => opponent.points || opponent.lastSeen === today);
     this.computeRankings();
+    void this.onlineService.updateLeaderboard(this.opponents.find(opp => opp.userId === this.onlineService.userId));
   }
 
   private computeOpponentsScore(allGames: AllGames): void {
     this.opponents = [];
     const today = OnlineService.getUtcTimestamp(Date.now());
     const myGames = allGames[today.toString()]
-      ?.[this.onlineService.webcomId]
+      ?.[this.onlineService.userId]
       ?.dailyGames
       ?? {};
 
     for (const [dayTimestamp, games] of Object.entries(allGames)) {
       for (const userId of Object.keys(games)) {
         const userDailyRecap = games[userId];
-        let searchedUser = this.opponents.find(user => user.webcomId === userId);
+        let searchedUser = this.opponents.find(user => user.userId === userId);
         if (!searchedUser) {
           searchedUser = new Opponent(userId, userDailyRecap.userDisplay, 0, 0, +dayTimestamp);
           this.opponents.push(searchedUser);
@@ -158,7 +207,7 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
         }
         for (const opponentId of Object.keys(userDailyRecap.dailyGames)) {
           const gameResult = userDailyRecap.dailyGames[opponentId];
-          const searchedOpponent = this.opponents.find(opp => opp.webcomId === opponentId);
+          const searchedOpponent = this.opponents.find(opp => opp.userId === opponentId);
           if (!searchedOpponent) {
             this.opponents.push(new Opponent(opponentId, null, 2 - gameResult, 0, 0));
           } else {
@@ -169,7 +218,7 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
       }
     }
     this.opponents = this.opponents.map(opponent => {
-      opponent.lastResult = myGames[opponent.webcomId];
+      opponent.lastResult = myGames[opponent.userId];
       return opponent;
     });
   }
@@ -181,7 +230,7 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
       } else if (a.lastSeen !== b.lastSeen) {
         return b.lastSeen - a.lastSeen;
       } else {
-        return b.webcomId.localeCompare(a.webcomId);
+        return b.userId.localeCompare(a.userId);
       }
     });
 
@@ -199,14 +248,14 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
       opponent.ranking = currentRanking;
     }
 
-    this.personalRanking = this.opponents.find(opp => opp.webcomId === this.onlineService.webcomId)?.ranking ?? 0;
+    this.personalRanking = this.opponents.find(opp => opp.userId === this.onlineService.userId)?.ranking ?? 0;
   }
 
   play(opponentId: string): void {
-    if (opponentId === this.onlineService.webcomId) {
+    if (opponentId === this.onlineService.userId) {
       return;
     }
-    this.lastResult = this.opponents.find(opponent => opponent.webcomId === opponentId)?.lastResult;
+    this.lastResult = this.opponents.find(opponent => opponent.userId === opponentId)?.lastResult;
     if (this.lastResult !== undefined) {
       this.modalService.open(this.replayGameContent)
         .result.then(async (replayValidated: boolean) => {
@@ -236,10 +285,14 @@ export class OnlineOpponentsComponent implements OnInit, OnDestroy {
 
   removeAccount(): void {
     this.modalService.open(this.deleteAccountContent, {size: 'sm'})
-      .result.then((deleteValidated: boolean) => {
+      .result.then(async (deleteValidated: boolean) => {
         if (deleteValidated) {
-          this.onlineService.removeAccount();
-          this.onlineService.disconnect();
+          this.loading = true;
+          try {
+            await this.onlineService.removeAccount();
+          } finally {
+            this.loading = false;
+          }
         }
       }, () => { });
   }

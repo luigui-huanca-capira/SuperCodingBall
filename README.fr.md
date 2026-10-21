@@ -27,8 +27,8 @@ Il y a deux modes de jeu :
 * le jeu local, contre l'ordinateur (avec quelques stratégies pré-définies)
 * le jeu en ligne, contre d'autres joueurs (nécessite une connexion Internet)
 
-Pour le jeu en ligne, SuperCodingBall utilise le service [Webcom](https://datasync.orange.com) pour stocker les informations des joueurs.
-C'est un service réservé aux développeurs [Orange](https://www.orange.com), mais il peut être facilement remplacé par tout autre "Backend As a Service" (comme Firebase). 
+Pour le jeu en ligne, SuperCodingBall utilise Firebase Authentication et Firebase Realtime Database pour stocker les informations des joueurs.
+La structure persistante et les règles d'accès sont documentées dans [DATABASE.md](DATABASE.md).
 
 Il y a 3 options pour se connecter :
 * En tant qu'invité (ne permet pas d'utiliser plusieurs appareils)

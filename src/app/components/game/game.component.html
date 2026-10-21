@@ -16,7 +16,7 @@
   }
   @if(displayType === DisplayType.Standalone) {
     <button class="btn btn-lg d-flex" type="button"
-      (click)="backToCodeEdition()">
+      (click)="openExitConfirmPopup(exitConfirmContent)">
       <img src="assets/icons/chevron-left-solid.png" class="oriented-icon icon24" />
     </button>
   }
@@ -29,6 +29,37 @@
       }
     </button>
   }
+  @if(displayType === DisplayType.Standalone) {
+    <button
+      class="btn btn-lg d-flex"
+      type="button"
+      onclick="this.blur()"
+      [attr.aria-label]="'HOME.BUTTON_HOW_TO' | translate"
+      [attr.title]="'HOME.BUTTON_HOW_TO' | translate"
+      (click)="openHowTo()">
+      <svg class="icon24 game-help-icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+        <circle cx="256" cy="256" r="220"/>
+        <text x="256" y="384" text-anchor="middle">?</text>
+      </svg>
+    </button>
+  }
+  <button
+    class="btn btn-lg d-flex"
+    type="button"
+    onclick="this.blur()"
+    [attr.aria-label]="soundEnabled ? 'Silenciar sonidos' : 'Activar sonidos'"
+    [attr.title]="soundEnabled ? 'Silenciar sonidos' : 'Activar sonidos'"
+    (click)="toggleSound()">
+    @if(soundEnabled) {
+      <svg class="icon24 sound-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="sound-wave" d="M16 8c1.3 1.1 1.3 6.9 0 8M19 5c3.3 3.2 3.3 10.8 0 14"/>
+      </svg>
+    } @else {
+      <svg class="icon24 sound-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="sound-wave" d="m16 9 5 6m0-6-5 6"/>
+      </svg>
+    }
+  </button>
   <div class="align-middle d-flex flex-grow-1">
     <div class="m-1 h6 bg-secondary rounded flex-grow-1 d-flex justify-content-between align-items-center">
       <div>
@@ -51,11 +82,25 @@
   </button>
 
 </nav>
-<div class="text-center">
+<div class="text-center game-stage" (pointerdown)="enableAudio()">
+  <div class="crowd crowd-top" aria-hidden="true"></div>
   <canvas id="fieldCanvas" class="pixelated" [class.fullscreen]="displayType === DisplayType.Standalone" width="456"
-    height="554" style="max-width: 400px;">
+    height="554">
   </canvas>
+  <div class="crowd crowd-bottom" aria-hidden="true"></div>
 </div>
+
+@if(youtubeAmbienceActive && soundEnabled) {
+  <iframe
+    class="youtube-ambience"
+    [src]="youtubeAmbienceUrl"
+    title="Sonido ambiental de estadio de fútbol"
+    allow="autoplay"
+    tabindex="-1"
+    aria-hidden="true"
+    (load)="onYoutubeAmbienceLoaded($event)">
+  </iframe>
+}
 
 <ng-template #kickOffBeforeFirstPeriodContent let-modal>
   <div class="modal-header">
@@ -86,5 +131,40 @@
     @if(ownScore === oppScore) {<h6 class="modal-title">{{'GAME.DRAW' | translate }}</h6>}
     @if(ownScore < oppScore) {<h6 class="modal-title">{{'GAME.YOU_LOST' | translate }}</h6>}
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+</ng-template>
+
+<ng-template #exitConfirmContent let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title">{{"GLOBAL.WARNING" | translate }}</h6>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p>{{ "GAME.EXIT_WARNING" | translate }}</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close(false)">
+      {{"GLOBAL.CANCEL" | translate }}
+    </button>
+    <button type="button" class="btn btn-danger" (click)="modal.close(true)">
+      {{"BLOCKLY.EXIT_CONFIRM" | translate }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #howToContent let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title">{{"HOW_TO.TITLE" | translate }}</h6>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body game-help-body">
+    <p [innerHTML]="'HOW_TO.GOAL' | translate"></p>
+    <div [innerHTML]="'HOW_TO.RULES' | translate"></div>
+    <p [innerHTML]="'HOW_TO.DISCOVER' | translate"></p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close()">
+      {{"GLOBAL.OK" | translate }}
+    </button>
   </div>
 </ng-template>

@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "Speel online!",
     "BUTTON_HOW_TO": "Hoe spelen we?",
     "BUTTON_ABOUT": "Meer ontdekken",
+    "BUTTON_DELETE_ACCOUNT": "Account verwijderen",
     "CONNECTION_WARNING": "Je moet verbonden zijn met internet om online te spelen!",
-    "STRONG_ENOUGH_WARNING": "Je moet eerst minstens 3 computervakken verslaan voordat je online mag spelen!"
+    "STRONG_ENOUGH_WARNING": "Je moet eerst minstens 3 computervakken verslaan voordat je online mag spelen!",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "Meld je eerst aan via <strong>Speel online</strong> om een account te verwijderen."
   },
   "HOW_TO": {
     "TITLE": "Hoe spelen we?",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "Als je verbinding maakt als gast, kun je spelen zoals de anderen, maar je zult je profielfoto niet hebben.<br><br>Je kunt je account niet op een ander apparaat vinden, en als je uitlogt, gaat je ranking verloren!",
     "CONNECT_WITH_FACEBOOK": "Verbind met Facebook",
     "CONNECT_WITH_GOOGLE": "Verbind met Google",
+    "CONNECTION_ERROR": "Verbinden is niet gelukt. Controleer de Firebase-configuratie en probeer het opnieuw.",
+    "ANONYMOUS_AUTH_DISABLED": "Firebase heeft de gastverbinding geweigerd omdat anoniem aanmelden niet is ingeschakeld. Schakel in Firebase Console Authentication > Sign-in method > Anonymous in.",
+    "AUTH_ERROR": "Firebase heeft het aanmelden geweigerd. Controleer of de authenticatieprovider is ingeschakeld en of het lokale domein is toegestaan.",
+    "DATA_ERROR": "Aanmelden is gelukt, maar de online gegevens konden niet worden geladen. Controleer Realtime Database en de regels.",
     "PERSONAL_RANK": "Je huidige ranking:",
     "RANKING": "Ranglijst van de laatste 15 dagen",
     "OPP_POINTS": "pt",
@@ -168,11 +174,15 @@
       "TITLE": "Overzicht van het veld met doelpositie van elke speler"
     },
     "DELETE_WARNING": "Wil je echt al je blokken verwijderen?!",
+    "EXIT_WARNING": "Weet je zeker dat je de wedstrijd wilt verlaten en terug wilt gaan?",
+    "EXIT_WARNING_IN_GAME": "Weet je zeker dat je de lopende wedstrijd wilt verlaten en terug wilt gaan?",
+    "EXIT_CONFIRM": "Wedstrijd verlaten",
     "SELF_DEFINED_ACTION": "Je kunt <strong>{{value}}</strong> niet in zijn eigen definitie plaatsen!"
   },
   "GAME": {
     "MIN": "min",
     "STOP_MODAL": "Wil je dit spel stoppen?",
+    "EXIT_WARNING": "Weet je zeker dat je de lopende wedstrijd wilt verlaten en terug wilt gaan naar het bewerken van blokken?",
     "KICK_OFF": "Laten we beginnen!",
     "CLICK_ANYWHERE": "(klik ergens)",
     "HALF_TIME": "Rust",

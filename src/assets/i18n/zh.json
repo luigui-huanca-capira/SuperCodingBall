@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "在线玩！",
     "BUTTON_HOW_TO": "我们怎么玩？",
     "BUTTON_ABOUT": "了解更多",
+    "BUTTON_DELETE_ACCOUNT": "删除账户",
     "CONNECTION_WARNING": "您必须连接到互联网才能进行在线游戏！",
-    "STRONG_ENOUGH_WARNING": "你必须先击败至少 3 支电脑队伍才能进行在线比赛！"
+    "STRONG_ENOUGH_WARNING": "你必须先击败至少 3 支电脑队伍才能进行在线比赛！",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "要删除账户，请先通过 <strong>在线玩</strong> 登录。"
   },
   "HOW_TO": {
     "TITLE": "我们怎么玩？",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "如果您以访客身份登录，您将可以正常游玩，但您将不会显示您的个人资料图片。<br><br>您将无法在其他设备上找到您的帐户，如果您退出登录，您的排名将会丢失！",
     "CONNECT_WITH_FACEBOOK": "通过 Facebook 登录",
     "CONNECT_WITH_GOOGLE": "与 Google 登录",
+    "CONNECTION_ERROR": "无法连接。请检查 Firebase 配置后重试。",
+    "ANONYMOUS_AUTH_DISABLED": "Firebase 拒绝访客连接，因为匿名登录尚未启用。请在 Firebase Console 中启用 Authentication > Sign-in method > Anonymous。",
+    "AUTH_ERROR": "Firebase 拒绝登录。请检查身份验证提供方是否已启用，并确认本地域名已授权。",
+    "DATA_ERROR": "登录成功，但无法加载在线数据。请检查 Realtime Database 及其规则。",
     "PERSONAL_RANK": "您目前的排名：",
     "RANKING": "过去15天的排名",
     "OPP_POINTS": "点数",

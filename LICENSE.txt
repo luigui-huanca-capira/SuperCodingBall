@@ -10,5 +10,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 You shall not use or display any trade names, trademarks, service marks, products names used within the software and owned by Orange SA and its subsidiaries, in whole or part of, in any medium, except as required for reasonable and customary use in describing the origin of the software and reproducing the content of this notice and documentation files.
 Any use or displaying shall constitute an infringement under intellectual property laws of France and international conventions.
 
-For online play, SuperCodingBall uses the Webcom service to store player information.
-This is a service reserved for Orange developers, but it can be easily replaced by any other "Backend As a Service".
+For online play, SuperCodingBall uses Firebase Authentication and Firebase Realtime Database to store player information.
+The database structure and access rules are documented in DATABASE.md.

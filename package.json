@@ -1,9 +1,14 @@
 {
   "name": "super-coding-ball",
   "version": "1.0.0",
+  "main": "electron/main.js",
   "scripts": {
     "start": "ng serve",
     "build": "ng build",
+    "build:desktop": "ng build --configuration desktop",
+    "electron": "npm run build:desktop && electron .",
+    "dist:win": "npm run build:desktop && electron-builder --win portable",
+    "dist:win-installer": "npm run build:desktop && electron-builder --win nsis",
     "watch": "ng build --watch --configuration development",
     "analyze-bundle": "ng build --configuration=analyze-bundle && source-map-explorer dist/**/*.js --no-border-checks"
   },
@@ -25,7 +30,6 @@
     "firebase": "^11.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "webcom": "^3.9.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -34,6 +38,32 @@
     "@angular/compiler-cli": "^21.2.17",
     "@angular/localize": "^21.2.17",
     "@types/bootstrap": "^5.2.11",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3",
     "typescript": "~5.9.3"
+  },
+  "build": {
+    "appId": "com.supercodingball.desktop",
+    "productName": "SuperCodingBall",
+    "compression": "store",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/super-coding-ball/browser/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
   }
 }

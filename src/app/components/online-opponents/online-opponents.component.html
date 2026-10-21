@@ -46,13 +46,13 @@
         </button>
         <!-- See: https://developers.facebook.com/docs/facebook-login/userexperience -->
         <button style="background-color: #0866FF" class="btn btn-lg my-2 p-0 text-start w-100" type="button"
-          (click)="loading=true;onlineService.connectWithFacebook()">
+          (click)="connectWithFacebook()">
           <img src="assets/icons/login_facebook.png" class="icon48">
           <span class="p-2 text-white h6">{{'ONLINE.CONNECT_WITH_FACEBOOK' | translate }}</span>
         </button>
         <!-- See: https://developers.google.com/identity/branding-guidelines -->
         <button style="background-color: #F2F2F2" class="btn btn-lg my-2 p-0 text-start w-100" type="button"
-          (click)="loading=true;onlineService.connectWithGoogle()">
+          (click)="connectWithGoogle()">
           <img src="assets/icons/login_google.png" class="icon48">
           <span style="color: #1F1F1F" class="p-2 h6">{{'ONLINE.CONNECT_WITH_GOOGLE' | translate }}</span>
         </button>
@@ -89,10 +89,10 @@
                 <img src="assets/icons/search-solid.png" style="width: 18px">
               </td>
             </tr>
-            @for (opponent of filteredOpponents; track opponent.webcomId) {
-              <tr (click)="play(opponent.webcomId)"
+            @for (opponent of filteredOpponents; track opponent.userId) {
+              <tr (click)="play(opponent.userId)"
               class="align-middle"
-              [class.bg-secondary]="opponent.webcomId === onlineService.webcomId">
+              [class.bg-secondary]="opponent.userId === onlineService.userId">
               <td>
                 <button class="btn text-start px-0">
                   {{opponent.ranking}}
@@ -117,7 +117,7 @@
                 </button>
               </td>
               <td class="text-center">
-                @if(opponent.webcomId !== onlineService.webcomId) {
+                @if(opponent.userId !== onlineService.userId) {
                   <button class="btn px-0">
                     @switch (opponent.lastResult) {
                       @case (GamePoint.WON) {<img class="icon24" src="assets/icons/trophy-solid-warning.png">}
@@ -237,7 +237,22 @@
       {{"GLOBAL.CANCEL" | translate }}
     </button>
     <button type="button" class="btn btn-danger"
-      (click)="modal.close();loading=true;onlineService.connectAnonymously()">
+      (click)="modal.close();connectAnonymously()">
+      {{"GLOBAL.OK" | translate }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #connectionErrorContent let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title">{{"GLOBAL.SORRY" | translate }}</h6>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p [innerHTML]="connectionErrorKey | translate"></p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close()">
       {{"GLOBAL.OK" | translate }}
     </button>
   </div>

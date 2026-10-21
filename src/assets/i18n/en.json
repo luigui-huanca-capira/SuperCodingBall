@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "Play online!",
     "BUTTON_HOW_TO": "How do we play?",
     "BUTTON_ABOUT": "Find out more",
+    "BUTTON_DELETE_ACCOUNT": "Delete account",
     "CONNECTION_WARNING": "You must be connected to Internet to play online!",
-    "STRONG_ENOUGH_WARNING": "You must first beat at least 3 computer teams before playing online!"
+    "STRONG_ENOUGH_WARNING": "You must first beat at least 3 computer teams before playing online!",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "To delete an account, sign in from <strong>Play online</strong> first."
   },
   "HOW_TO": {
     "TITLE": "How do we play?",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "If you connect as a guest, you will be able to play like the others, but you will not have your profile picture.<br><br>You will not be able to find your account on another device, and if you log out, your ranking will be lost!",
     "CONNECT_WITH_FACEBOOK": "Connect with Facebook",
     "CONNECT_WITH_GOOGLE": "Connect with Google",
+    "CONNECTION_ERROR": "Could not connect. Check the Firebase configuration and try again.",
+    "ANONYMOUS_AUTH_DISABLED": "Firebase rejected the guest connection because Anonymous sign-in is not enabled. In Firebase Console, enable Authentication > Sign-in method > Anonymous.",
+    "AUTH_ERROR": "Firebase rejected sign-in. Check that the authentication provider is enabled and the local domain is authorized.",
+    "DATA_ERROR": "Sign-in succeeded, but the online data could not be loaded. Check Realtime Database and its rules.",
     "PERSONAL_RANK": "Your current ranking:",
     "RANKING": "Last 15 days ranking",
     "OPP_POINTS": "pts",
@@ -168,11 +174,15 @@
       "TITLE": "Field overview with target position of each player"
     },
     "DELETE_WARNING": "You really want to delete all your blocks!?",
+    "EXIT_WARNING": "Are you sure you want to leave the match and go back?",
+    "EXIT_WARNING_IN_GAME": "Are you sure you want to abandon the ongoing match and go back?",
+    "EXIT_CONFIRM": "Leave match",
     "SELF_DEFINED_ACTION": "You can't put <strong>{{value}}</strong> in its own definition!"
   },
   "GAME": {
     "MIN": "min",
     "STOP_MODAL": "Do you want to stop this game?",
+    "EXIT_WARNING": "Are you sure you want to abandon the ongoing match and go back to block editing?",
     "KICK_OFF": "Let's go!",
     "CLICK_ANYWHERE": "(click anywhere)",
     "HALF_TIME": "Half-time",

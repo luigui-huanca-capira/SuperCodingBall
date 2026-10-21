@@ -9,48 +9,37 @@
 * or see the "LICENSE.txt" file for more details.
 -->
 
-<div class="px-4 py-5 text-center" style="background-color: #ccffcc;">
-  <img class="d-block mx-auto mb-4 oriented-icon" src="assets/app-icons/icon-512x512.png" alt="" style="width: 192px">
-  <h1 class="display-5 fw-bold">SuperCodingBall</h1>
-  <div class="col-lg-6 mx-auto">
-    <p class="lead mb-4">{{"HOME.MOTTO" | translate }}</p>
-    <div class="justify-content-sm-center">
+<main class="home-page">
+  <section class="home-layout" aria-label="Menu principal">
+    <div class="home-brand">
+      <img class="home-logo oriented-icon" src="assets/app-icons/icon-512x512.png" alt="">
+      <h1 class="home-title">SuperCodingBall</h1>
+      <p class="home-motto">{{"HOME.MOTTO" | translate }}</p>
+    </div>
+
+    <nav class="home-menu">
       <button
         type="button"
-        class="btn btn-primary btn-lg px-4 m-2"
+        class="btn btn-primary home-action home-action-primary"
         routerLink="/offline-opponents">
         {{"HOME.BUTTON_PLAY_OFFLINE" | translate }}
       </button>
-      <button
-        type="button"
-        class="btn btn-danger btn-lg px-4 m-2"
-        (click)='goOnline()'>
-        {{"HOME.BUTTON_PLAY_ONLINE" | translate }}
-      </button>
-    </div>
-    <div>
-      <button type="button" class="btn btn-warning btn-lg px-4 m-2"
-              routerLink="/howto">{{"HOME.BUTTON_HOW_TO" | translate }}</button>
-    </div>
-    <div>
-      <button type="button" class="btn btn-outline-dark btn-lg px-4 m-2"
-              routerLink="/about">{{"HOME.BUTTON_ABOUT" | translate }}</button>
-    </div>
-  </div>
-</div>
 
-<ng-template #online_info let-modal>
-  <div class="modal-header">
-    <h6 class="modal-title">{{"GLOBAL.WARNING" | translate }}</h6>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body" [innerHTML]="'HOME.CONNECTION_WARNING' | translate"></div>
-</ng-template>
+      <div class="home-secondary-actions">
+        <button
+          type="button"
+          class="btn btn-warning home-action"
+          routerLink="/howto">
+          {{"HOME.BUTTON_HOW_TO" | translate }}
+        </button>
 
-<ng-template #offline_info let-modal>
-  <div class="modal-header">
-    <h6 class="modal-title">{{"GLOBAL.SORRY" | translate }}</h6>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body" [innerHTML]="'HOME.STRONG_ENOUGH_WARNING' | translate"></div>
-</ng-template>
+        <button
+          type="button"
+          class="btn btn-outline-dark home-action"
+          routerLink="/about">
+          {{"HOME.BUTTON_ABOUT" | translate }}
+        </button>
+      </div>
+    </nav>
+  </section>
+</main>

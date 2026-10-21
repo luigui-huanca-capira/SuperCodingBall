@@ -3,6 +3,84 @@
   object-fit: contain;
 }
 
+.game-stage {
+  --field-max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+#fieldCanvas {
+  display: block;
+  max-width: var(--field-max-width);
+}
+
+.crowd {
+  width: min(100%, var(--field-max-width));
+  height: 88px;
+  flex: 0 0 88px;
+  background-image: url('../../../assets/stadium-crowd.png');
+  background-position: center 43%;
+  background-size: cover;
+  border-bottom: 3px solid #ffbf00;
+}
+
+.crowd-bottom {
+  background-position: center 75%;
+  border-top: 3px solid #ffbf00;
+  border-bottom: 0;
+}
+
+.youtube-ambience {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  right: 0;
+  bottom: 0;
+  border: 0;
+  opacity: 0.01;
+  pointer-events: none;
+}
+
+.sound-icon {
+  display: block;
+  fill: currentColor;
+}
+
+.sound-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
 .btn.disabled, .btn:disabled {
   opacity: 0.2;
+}
+
+.game-help-icon {
+  display: block;
+
+  circle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 46;
+  }
+
+  text {
+    fill: currentColor;
+    font-family: Arial, sans-serif;
+    font-size: 360px;
+    font-weight: 700;
+  }
+}
+
+.game-help-body {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.game-help-body p:last-child {
+  margin-bottom: 0;
 }

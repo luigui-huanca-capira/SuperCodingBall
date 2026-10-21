@@ -72,8 +72,10 @@
     "BUTTON_PLAY_ONLINE": "Jouer en ligne\u00A0!",
     "BUTTON_HOW_TO": "Comment on joue\u00A0?",
     "BUTTON_ABOUT": "En savoir +",
+    "BUTTON_DELETE_ACCOUNT": "Supprimer le compte",
     "CONNECTION_WARNING": "Tu dois être connecté à Internet pour jouer en ligne\u00A0!",
-    "STRONG_ENOUGH_WARNING": "Tu dois d'abord battre au moins 3 équipes de l'ordi avant de jouer en ligne\u00A0!"
+    "STRONG_ENOUGH_WARNING": "Tu dois d'abord battre au moins 3 équipes de l'ordi avant de jouer en ligne\u00A0!",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "Pour supprimer un compte, connecte-toi d'abord depuis <strong>Jouer en ligne</strong>."
   },
   "HOW_TO": {
     "TITLE": "Comment on joue\u00A0?",
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "Si tu te connectes en tant qu'invité, tu pourras jouer comme les autres, mais tu n'auras pas ton image de profil.<br><br>Tu ne pourras pas retrouver ton compte sur un autre appareil, et si tu te déconnectes, ton classement sera perdu\u00A0!",
     "CONNECT_WITH_FACEBOOK": "Connexion avec Facebook",
     "CONNECT_WITH_GOOGLE": "Connexion avec Google",
+    "CONNECTION_ERROR": "Connexion impossible. Vérifie la configuration Firebase puis réessaie.",
+    "ANONYMOUS_AUTH_DISABLED": "Firebase a refusé la connexion invité car le fournisseur anonyme n'est pas activé. Dans Firebase Console, active Authentication > Sign-in method > Anonymous.",
+    "AUTH_ERROR": "Firebase a refusé la connexion. Vérifie que le fournisseur d'authentification est activé et que le domaine local est autorisé.",
+    "DATA_ERROR": "La connexion a réussi, mais les données en ligne n'ont pas pu être chargées. Vérifie Realtime Database et ses règles.",
     "PERSONAL_RANK": "Ton classement actuel\u00A0:",
     "RANKING": "Classement des 15 derniers jours",
     "OPP_POINTS": "pts",
@@ -168,11 +174,15 @@
       "TITLE": "Aperçu du terrain avec poste cible de chaque joueur"
     },
     "DELETE_WARNING": "Tu veux vraiment effacer tous tes blocs\u00A0!?",
+    "EXIT_WARNING": "Tu es sûr de vouloir quitter le match et revenir en arrière\u00A0?",
+    "EXIT_WARNING_IN_GAME": "Tu es sûr de vouloir abandonner le match en cours et revenir en arrière\u00A0?",
+    "EXIT_CONFIRM": "Quitter le match",
     "SELF_DEFINED_ACTION": "Tu ne peux pas mettre <strong>{{value}}</strong> dans sa propre définition\u00A0!"
   },
   "GAME": {
     "MIN": "min",
     "STOP_MODAL": "Est-ce que tu veux arrêter le match\u00A0?",
+    "EXIT_WARNING": "Tu es sûr de vouloir abandonner le match en cours et revenir à l'édition des blocs\u00A0?",
     "KICK_OFF": "C'est parti\u00A0!",
     "CLICK_ANYWHERE": "(clique n'importe où)",
     "HALF_TIME": "Mi-temps",

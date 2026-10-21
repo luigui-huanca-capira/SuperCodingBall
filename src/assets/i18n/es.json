@@ -68,20 +68,22 @@
   },
   "HOME": {
     "MOTTO": "Explora el código gracias al fútbol!",
-    "BUTTON_PLAY_OFFLINE": "Jugar contre el ordenador",
+    "BUTTON_PLAY_OFFLINE": "Jugar contra el ordenador",
     "BUTTON_PLAY_ONLINE": "Jugar en línea!",
-    "BUTTON_HOW_TO": "¿Como jugar?",
+    "BUTTON_HOW_TO": "¿Cómo jugar?",
     "BUTTON_ABOUT": "Acerca de...",
+    "BUTTON_DELETE_ACCOUNT": "Eliminar cuenta",
     "CONNECTION_WARNING": "¡Debes estar conectado a Internet para jugar en línea!",
-    "STRONG_ENOUGH_WARNING": "¡Debes haber vencido al menos 3 veces al ordenador para poder jugar en línea!"
+    "STRONG_ENOUGH_WARNING": "¡Debes haber vencido al menos 3 veces al ordenador para poder jugar en línea!",
+    "DELETE_ACCOUNT_LOGIN_REQUIRED": "Para eliminar una cuenta, primero debes iniciar sesión desde <strong>Jugar en línea</strong>."
   },
   "HOW_TO": {
-    "TITLE": "¿Como jugar?",
+    "TITLE": "¿Cómo jugar?",
     "GOAL": "SuperCodingBall es un juego de fútbol donde los jugadores no saben nada y tú debes decirles qué hacer!",
     "RULES": "Las reglas del juego son simples:<ul><li>El balón no puede salir del terreno de juego</li><li>No hay fuera de juego</li><li>La energía de un jugador comienza en 100 y disminuye cuando hace sprint o cuando lo empujan</li><li>Un jugador sin energía cae y pierde el balón!</li></ul>",
-    "BLOCK": "Para definir tu estrategia vas a decir a tus jugadores <strong>a cada momento</strong> la acción que deben hacer.<br>Por ejemploe, si quieres que tus jugadores tiren a puerta desde que tengan el balón hay que elegir:<br>",
-    "PARAMETER": "Puedes cambiar los parámetros de ciertos bloques.<br>Por ejemplo reemplazando este bloque rosa, puedes pedir a tus jugadore que pasen el balón a su compañero más cercano, en cuanto tengan el balón:<br>",
-    "CONDITION": "Finalmente puedes añadir condiciones para mejorar tus estrategias!<br>Por ejemplo, puedes escoger una de las dos acciones precedentes, según la distance entre tus jugadores y la portería adversa:<br>",
+    "BLOCK": "Para definir tu estrategia vas a decir a tus jugadores <strong>a cada momento</strong> la acción que deben hacer.<br>Por ejemplo, si quieres que tus jugadores tiren a puerta desde que tengan el balón hay que elegir:<br>",
+    "PARAMETER": "Puedes cambiar los parámetros de ciertos bloques.<br>Por ejemplo reemplazando este bloque rosa, puedes pedir a tus jugadores que pasen el balón a su compañero más cercano, en cuanto tengan el balón:<br>",
+    "CONDITION": "Finalmente puedes añadir condiciones para mejorar tus estrategias!<br>Por ejemplo, puedes escoger una de las dos acciones precedentes, según la distancia entre tus jugadores y la portería adversa:<br>",
     "DISCOVER": "Ahora te toca jugar a tí y descubrir el resto!",
     "DEMO": "También puedes analizar una estrategía completa pulsando aquí"
   },
@@ -113,7 +115,7 @@
   },
   "PRIVACY": {
     "TITLE": "Nota sobre datos personales",
-    "DISABLE_TRACKING": "Desactivar el segiumiento de actividad anónimo"
+    "DISABLE_TRACKING": "Desactivar el seguimiento de actividad anónimo"
   },
   "TERMS": {
     "TITLE": "Condiciones generales de utilización del servicio SuperCodingBall"
@@ -138,6 +140,10 @@
     "GUEST_WARNING": "Si te conectas como invitado, puedes jugar como los otros, pero no tendrás imagen de perfil.<br><br>No podrás encontrar tu cuenta en otro dispositivo, y si te desconectas tu clasificación se perderá!",
     "CONNECT_WITH_FACEBOOK": "Conexión con Facebook",
     "CONNECT_WITH_GOOGLE": "Conexión con Google",
+    "CONNECTION_ERROR": "No se pudo conectar. Revisa la configuración de Firebase e inténtalo otra vez.",
+    "ANONYMOUS_AUTH_DISABLED": "Firebase rechazó la conexión como invitado porque el proveedor anónimo no está habilitado. En Firebase Console activa Authentication > Sign-in method > Anonymous.",
+    "AUTH_ERROR": "Firebase rechazó el inicio de sesión. Revisa que el proveedor de autenticación esté habilitado y que el dominio local esté autorizado.",
+    "DATA_ERROR": "La sesión se inició, pero no se pudieron cargar los datos online. Revisa Realtime Database y sus reglas.",
     "PERSONAL_RANK": "Tu clasificación actual:",
     "RANKING": "Clasificación de los últimos 15 días",
     "OPP_POINTS": " puntos",
@@ -158,21 +164,25 @@
     "NICKNAME_LIMIT": "20 caracteres max",
     "CHANGE_NICKNAME": "Cambiar mi nombre de usuario",
     "DISCONNECT_ACCOUNT": "Desconectarme",
-    "SYNC_TEXT": "Tus bloques serán exportados automáticamenete cada vez que lances un partido en línea.",
+    "SYNC_TEXT": "Tus bloques serán exportados automáticamente cada vez que lances un partido en línea.",
     "DOWNLOAD_TEXT": "Si quieres importar tus bloques (por ejemplo si has modificado tu estrategia en otro dispositivo) pulsa aquí:",
-    "DELETE_ACCOUNT": "Suprimir mi cuenta definitivamente",
-    "DELETE_MODAL": "¿Estás seguro de que quieres suprimir tu cuenta??"
+    "DELETE_ACCOUNT": "Eliminar mi cuenta definitivamente",
+    "DELETE_MODAL": "¿Estás seguro de que quieres eliminar tu cuenta?"
   },
   "BLOCKLY": {
     "FIELD_POPUP": {
       "TITLE": "Vista previa del campo con la posición de cada jugador"
     },
     "DELETE_WARNING": "¿Estás seguro de que quieres suprimir todos tus bloques!?",
+    "EXIT_WARNING": "¿Estás seguro de que quieres salir de la partida y volver atrás?",
+    "EXIT_WARNING_IN_GAME": "¿Estás seguro de que quieres abandonar el partido en curso y volver atrás?",
+    "EXIT_CONFIRM": "Salir de la partida",
     "SELF_DEFINED_ACTION": "¡No puedes poner <strong>{{value}}</strong> en su propia definición!"
   },
   "GAME": {
     "MIN": "min",
     "STOP_MODAL": "¿Quieres parar el partido?",
+    "EXIT_WARNING": "¿Estás seguro de que quieres abandonar el partido en curso y volver a la edición de bloques?",
     "KICK_OFF": "¡Vamos!",
     "CLICK_ANYWHERE": "(pulsa en cualquier lugar)",
     "HALF_TIME": "Descanso",
