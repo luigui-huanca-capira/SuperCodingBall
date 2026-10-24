@@ -10,6 +10,8 @@
     "dist:win": "npm run build:desktop && electron-builder --win portable",
     "dist:win-installer": "npm run build:desktop && electron-builder --win nsis",
     "watch": "ng build --watch --configuration development",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "analyze-bundle": "ng build --configuration=analyze-bundle && source-map-explorer dist/**/*.js --no-border-checks"
   },
   "private": true,
@@ -38,9 +40,12 @@
     "@angular/compiler-cli": "^21.2.17",
     "@angular/localize": "^21.2.17",
     "@types/bootstrap": "^5.2.11",
+    "@vitest/coverage-v8": "^4.0.18",
     "electron": "^44.3.0",
     "electron-builder": "^26.15.3",
-    "typescript": "~5.9.3"
+    "jsdom": "^29.1.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.0.18"
   },
   "build": {
     "appId": "com.supercodingball.desktop",
